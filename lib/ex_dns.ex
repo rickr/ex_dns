@@ -146,7 +146,7 @@ defmodule ExDns do
     labels
   end
 
-  # qname contains many labels
+  # qname contains many labels in the format of <length (8bits)> <label (length * 8 bAits)>
   defp parse_qname(question, labels, question_size) when question_size > 32 do
     case get_qname_label_bits(question) do
       {:ok, qname_label_bits} ->
