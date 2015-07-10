@@ -1,5 +1,7 @@
 defmodule ExDns do
   use Application
+  require ExDns.Response
+
   @header_size 96
   @qname_length_size 8
 
@@ -16,8 +18,7 @@ defmodule ExDns do
   end
 
   def accept(port) do
-    {:ok, socket} = :gen_tcp.listen(port,
-                      [:binary, active: false, reuseaddr: true])
+    {:ok, socket} = :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true])
     IO.puts "Accepting connections on port #{port}"
     loop_acceptor(socket)
   end
@@ -42,7 +43,8 @@ defmodule ExDns do
       :ok -> IO.puts "RX'd data"
       {:ok, data} ->
         IO.puts "RX'd data #{inspect(data)}"
-        _parsed_message = parse_message(data)
+        parsed_message = parse_message(data)
+        ExDns.Response.for(socket, parsed_message)
       {:error, :closed} -> IO.puts "Closed"
       {:error, _} = err -> err
     end
@@ -88,6 +90,7 @@ defmodule ExDns do
     parsed_question = parse_question(question, parsed_header[:qdcount], [])
     IO.puts "Header: #{inspect(parsed_header)}"
     IO.puts "Question: #{inspect(parsed_question)}"
+    [header: parsed_header, question: parsed_question]
   end
 
 
