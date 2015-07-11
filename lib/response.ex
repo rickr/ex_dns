@@ -46,47 +46,21 @@ defmodule ExDns.Response do
     response_header = request_header
     IO.puts "Building header for id #{inspect(response_header[:id])}"
     response_header = response_header |>
-      set_qr |>
-      set_ra |>
-      set_z |>
-      set_rcode |>
-      set_qdcount |>
-      set_ancount |>
-      set_nscount |>
-      set_arcount |>
+      set_header_field(:qr, ExDns.Response.Codes.Qr.response) |>
+      set_header_field(:ra, ExDns.Response.Codes.Ra.enabled) |>
+      set_header_field(:z, ExDns.Response.Codes.Z.reserved) |>
+      set_header_field(:rcode, ExDns.Response.Codes.Rcode.not_implemented) |>
+      set_header_field(:qdcount, << 0::16 >>) |>
+      set_header_field(:ancount, << 0::16 >>) |>
+      set_header_field(:nscount, << 0::16 >>) |>
+      set_header_field(:arcount, << 0::16 >>) |>
       pack_header
   end
 
-  def set_qr(header) do
-    Keyword.update!(header, :qr, fn(_)-> ExDns.Response.Codes.Qr.response end)
-  end
-
-  def set_ra(header) do
-    Keyword.update!(header, :ra, fn(_)-> ExDns.Response.Codes.Ra.enabled end)
-  end
-
-  def set_z(header) do
-    Keyword.update!(header, :z, fn(_)-> ExDns.Response.Codes.Z.reserved end)
-  end
-
-  def set_rcode(header) do
-    Keyword.update!(header, :rcode, fn(_)-> ExDns.Response.Codes.Rcode.not_implemented end)
-  end
-
-  def set_qdcount(header) do
-    Keyword.update!(header, :qdcount, fn(_)-> << 0::16 >> end)
-  end
-
-  def set_ancount(header) do
-    Keyword.update!(header, :ancount, fn(_)-> << 0::16 >> end)
-  end
-
-  def set_nscount(header) do
-    Keyword.update!(header, :nscount, fn(_)-> << 0::16 >> end)
-  end
-
-  def set_arcount(header) do
-    Keyword.update!(header, :arcount, fn(_)-> << 0::16 >> end)
+  # Ruby makes me want to do some metaprogramming here...something like
+  # set_header_<field>(header, value)...is this possible?
+  def set_header_field(header, key, value) do
+    Keyword.update!(header, key, fn(_)-> value end)
   end
 
   def pack_header(header) do
