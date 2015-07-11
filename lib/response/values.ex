@@ -20,4 +20,7 @@ defmodule ExDns.Response.Values do
     two_bytes(value)
   end
 
+  def rd(value) do
+    << value::1 >>
+  end
 end

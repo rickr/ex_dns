@@ -136,8 +136,8 @@ defmodule ExDns do
 
   ###
   ### Parse the question section
-  defp parse_question(question, qdcount, labels) when qdcount > 0 do
-    case parse_qname(question, labels, bit_size(question)) do
+  defp parse_question(question, qdcount, request) when qdcount > 0 do
+    case parse_qname(question, request, bit_size(question)) do
       {:ok, data} ->
         << qtype :: integer-size(16), qclass :: integer-size(16) >> = data[:remaining_question]
         parsed_question = [labels: data[:labels], qtype: qtype, qclass: qclass]
@@ -145,8 +145,9 @@ defmodule ExDns do
     end
   end
 
-  defp parse_question(_question, qdcount, labels) when qdcount == 0 do
-    labels
+  defp parse_question(_question, qdcount, request) when qdcount == 0 do
+    # Ensure our labels end with '.'
+    request
   end
 
   # qname contains many labels in the format of <length (8bits)> <label (length * 8 bAits)>
@@ -166,6 +167,7 @@ defmodule ExDns do
 
   # when the size of the question is < 32 we only have qtype and qclass remaining
   defp parse_qname(question, labels, _question_size) do
+    # TODO check if we really dont end in '.'
     {:ok, [labels: labels, remaining_question: question]}
   end
 
