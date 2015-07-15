@@ -2,7 +2,8 @@ defmodule ExDns.Resolve do
   @root_hints_url 'http://www.internic.net/domain/named.root'
 
   def root_servers do
-    ["198.41.0.4", "192.228.79.201"]
+    #["198.41.0.4", "192.228.79.201"]
+    ["198.41.0.4"]
   end
 
   # I feel like this is named poorly in this context
@@ -32,12 +33,18 @@ defmodule ExDns.Resolve do
     end
 
     IO.puts("Asking #{ns_server} for label: #{label} (NS)")
-    send_request(ns_server, label) |> close_socket
+    ExDns.Request.build(label, "ns")
+      |> send_request(ns_server)
+      |> close_socket
   end
 
-  def send_request(ns_server, lable) do
-    {:ok, socket} = :gen_udp.open(0, [:binary])
-    #:gen_udp.send(socket, ns_server, 53, 0)
+  def send_request(request, ns_server) do
+    IO.puts("TX data (#{bit_size(request)}) #{inspect(request)} to #{inspect(ns_server)}")
+    {:ok, socket} = :gen_udp.open(0, [:binary, active: false])
+    {:ok, dest_ip} = :inet_parse.address(String.to_char_list(ns_server))
+    :gen_udp.send(socket, dest_ip, 53, request)
+    response = :gen_udp.recv(socket, 0, 2000)
+    IO.puts("Response from #{inspect(dest_ip)}: #{inspect(response)}")
     socket
   end
 

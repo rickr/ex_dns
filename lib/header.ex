@@ -1,4 +1,7 @@
 defmodule ExDns.Header do
+  import ExDns.Header.Parser
+
+  #  DNS Header format:
   #    0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
   #  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
   #  |                      ID                       |
@@ -13,12 +16,12 @@ defmodule ExDns.Header do
   #  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
   #  |                    ARCOUNT                    |
   #  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-  def build(id \\ 0, qdcount \\ 0, rd \\ 0) do
-    response_header = []
+  def build(id \\ 0, qr \\ ExDns.Response.Codes.Qr.response, qdcount \\ 0, rd \\ 0) do
     IO.puts "Building header for id #{inspect(id)}"
+    response_header = []
     response_header
       |>set_field(:id, id)
-      |> set_field(:qr, ExDns.Response.Codes.Qr.response)
+      |> set_field(:qr, qr)
       |> set_field(:opcode, ExDns.Response.Codes.Opcode.query)
       |> set_field(:aa, ExDns.Response.Codes.Aa.not_authoritative)
       |> set_field(:tc, ExDns.Response.Codes.Tc.not_truncated)
@@ -42,10 +45,6 @@ defmodule ExDns.Header do
   def pack(header) do
     values = Keyword.values(header)
     bytes = :erlang.list_to_bitstring(values)
-    IO.puts("Packing:")
-    IO.puts("Header: #{inspect(header)}")
-    IO.puts("bytes: #{inspect(bytes)}")
-    IO.puts("Size: #{bit_size(bytes)}")
     bytes
   end
 end
