@@ -10,7 +10,7 @@ defmodule ExDns.Response do
     # If move on to next label
     # If nothing in cache, start at root, ask for labels in reverse
     ExDns.Resolve.labels(labels)
-    ExDns.Header.build(parsed_message[:header][:id], parsed_message[:header][:qdcount]) 
+    ExDns.Header.build(parsed_message[:header][:id], parsed_message[:header][:qdcount])
       |> send_response(socket)
   end
 

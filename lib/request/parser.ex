@@ -14,27 +14,36 @@ defmodule ExDns.Request.Parser do
       question :: bits-size(question_length)
     >> = message
 
-    parsed_header = ExDns.Header.Parser.parse(header)
-    parsed_question = parse_question(question, parsed_header[:qdcount], [])
-    IO.puts "Header: #{inspect(parsed_header)}"
-    IO.puts "Question: #{inspect(parsed_question)}"
-    [header: parsed_header, question: parsed_question]
+    #parsed_header = ExDns.Header.Parser.parse(header)
+    #parsed_question = parse_question(question, parsed_header[:qdcount], [])
+    #IO.puts "Header: #{inspect(parsed_header)}"
+    #IO.puts "Question: #{inspect(parsed_question)}"
+
+    ExDns.Header.Parser.parse(header)
+      |> parse_question(question)
+      #parsed_question = parse_question(question, parsed_header[:qdcount])
+    #[header: parsed_header, question: parsed_question]
   end
 
 
-  ###
-  ### Parse the question section
-  defp parse_question(question, qdcount, labels) when qdcount > 0 do
+  #############
+  # private
+  #############
+  defp parse_question(parsed_header, question) do
+    parse_question(parsed_header[:qdcount], question, [], parsed_header)
+  end
+
+  defp parse_question(qdcount, question, labels, parsed_header) when qdcount > 0 do
     case parse_qname(question, labels, bit_size(question)) do
       {:ok, data} ->
         << qtype :: integer-size(16), qclass :: integer-size(16) >> = data[:remaining_question]
         parsed_question = [labels: data[:labels], qtype: qtype, qclass: qclass]
-        parse_question(question, qdcount - 1, parsed_question)
+        parse_question(qdcount - 1, question, parsed_question, parsed_header)
     end
   end
 
-  defp parse_question(_question, qdcount, labels) when qdcount == 0 do
-    labels
+  defp parse_question(qdcount, _question, parsed_question, parsed_header) when qdcount == 0 do
+    [header: parsed_header, question: parsed_question]
   end
 
   # qname contains many labels
