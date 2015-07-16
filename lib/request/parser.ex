@@ -14,15 +14,8 @@ defmodule ExDns.Request.Parser do
       question :: bits-size(question_length)
     >> = message
 
-    #parsed_header = ExDns.Header.Parser.parse(header)
-    #parsed_question = parse_question(question, parsed_header[:qdcount], [])
-    #IO.puts "Header: #{inspect(parsed_header)}"
-    #IO.puts "Question: #{inspect(parsed_question)}"
-
     ExDns.Header.Parser.parse(header)
       |> parse_question(question)
-      #parsed_question = parse_question(question, parsed_header[:qdcount])
-    #[header: parsed_header, question: parsed_question]
   end
 
 
@@ -45,6 +38,8 @@ defmodule ExDns.Request.Parser do
   defp parse_question(qdcount, _question, parsed_question, parsed_header) when qdcount == 0 do
     [header: parsed_header, question: parsed_question]
   end
+
+
 
   # qname contains many labels
   defp parse_qname(question, labels, question_size) when question_size > 32 do

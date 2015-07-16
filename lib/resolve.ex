@@ -27,9 +27,10 @@ defmodule ExDns.Resolve do
   end
 
   def ask_for_authoritative(ns_ip_and_label, cur_label) do
+    IO.puts(inspect(ns_ip_and_label))
     {ns_ip, full_label} = case ns_ip_and_label do
       {} -> {random(root_servers), ""}
-      {_, _} -> ns_ip_and_label
+      {_, _} -> {"1.2.3.4", Tuple.to_list(ns_ip_and_label) |> List.last}
     end
 
     # This is kind of crappy. On our initial run we pass in an empty tuple.

@@ -1,5 +1,11 @@
 defmodule ExDns.Header.Parser do
-  def parse(header) do
+  @header_size 96
+
+  def parse(message) do
+    question_length = (bit_size(message) - @header_size)
+
+    << header::bits-size(@header_size), _::bits-size(question_length) >> = message
+
     <<
       id :: bits-size(16),
       qr :: bits-size(1),
