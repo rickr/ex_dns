@@ -40,7 +40,7 @@ defmodule ExDns do
       :ok -> IO.puts "RX'd data"
       {:ok, data} ->
         IO.puts "RX'd data #{inspect(data)}"
-        parsed_message = ExDns.Request.Parser.parse(data)
+        parsed_message = ExDns.Message.new(data) |> ExDns.Message.parse
         ExDns.Response.for(socket, parsed_message)
       {:error, :closed} -> IO.puts "Closed"
       {:error, _} = err -> err

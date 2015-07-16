@@ -8,7 +8,8 @@ defmodule ExDns.Resolve do
 
   def root_servers do
     #["198.41.0.4", "192.228.79.201"]
-    ["198.41.0.4"]
+    ["192.228.79.201"]
+    #["198.41.0.4"]
   end
 
   # I feel like this is named poorly in this context
@@ -39,9 +40,10 @@ defmodule ExDns.Resolve do
     label = "#{cur_label}.#{full_label}"
 
     IO.puts("Asking #{ns_ip} for label: #{label} (NS)")
-    ExDns.Request.build(label, "ns")
-      |> send_request(ns_ip)
-      |> close_socket
+    case ExDns.Request.build(label, "ns") |> send_request(ns_ip) do
+      {:ok, {socket, message}} -> ExDns.Message.new(message) |> ExDns.Message.parse
+      {:failed, {socket, _}} -> IO.puts "Failed Request"; close_socket(socket)
+    end
     {ns_ip, label}
   end
 
@@ -56,9 +58,10 @@ defmodule ExDns.Resolve do
     {:ok, socket} = :gen_udp.open(0, [:binary, active: false])
     {:ok, dest_ip} = :inet_parse.address(String.to_char_list(ns_server))
     :gen_udp.send(socket, dest_ip, 53, request)
-    response = :gen_udp.recv(socket, 0, 2000)
-    IO.puts("Response from #{inspect(dest_ip)}: #{inspect(response)}")
-    socket
+    case :gen_udp.recv(socket, 0, 2000) do
+      {:ok, {_, _, message}} -> IO.puts("RX data #{inspect(message)}"); {:ok, {socket, message}}
+      #_ -> {:failed, {socket, :failed}}
+    end
   end
 
   def close_socket(socket) do
