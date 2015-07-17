@@ -37,11 +37,12 @@ defmodule ExDns.Resolve do
     # This is kind of crappy. On our initial run we pass in an empty tuple.
     # Above we match on an empty tuple and set full_label to an empty string.
     # This gives us the result of appending a "." to our initial label.
-    label = "#{cur_label}.#{full_label}"
+    #label = "#{cur_label}.#{full_label}"
+    label = cur_label
 
     IO.puts("Asking #{ns_ip} for label: #{label} (NS)")
     case ExDns.Request.build(label, "ns") |> send_request(ns_ip) do
-      {:ok, {socket, message}} -> ExDns.Message.new(message) |> ExDns.Message.parse
+      {:ok, {_socket, message}} -> ExDns.Message.new(message) |> ExDns.Message.parse
       {:failed, {socket, _}} -> IO.puts "Failed Request"; close_socket(socket)
     end
     {ns_ip, label}
@@ -60,7 +61,7 @@ defmodule ExDns.Resolve do
     :gen_udp.send(socket, dest_ip, 53, request)
     case :gen_udp.recv(socket, 0, 2000) do
       {:ok, {_, _, message}} -> IO.puts("RX data #{inspect(message)}"); {:ok, {socket, message}}
-      #_ -> {:failed, {socket, :failed}}
+      _ -> {:failed, {socket, :failed}}
     end
   end
 

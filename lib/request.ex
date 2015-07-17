@@ -1,6 +1,4 @@
 defmodule ExDns.Request do
-  import ExDns.Request.Parser
-
   def build(label, type) do
     id = generate_id
     IO.puts "Building request for #{label} id: #{inspect(id)}"

@@ -27,13 +27,13 @@ defmodule ExDns.Message.QName do
           label :: bitstring-size(qname_label_bits),
           remaining_question :: binary
         >> = question
+        IO.puts label
         labels = List.insert_at(labels, -1, label)
         ExDns.Message.QName.parse(remaining_question, labels, qdcount)
       {:end_of_qname, remaining_question} -> ExDns.Message.QName.parse(remaining_question, labels, qdcount - 1)
     end
   end
 
-  # when the size of the question is < 32 we only have qtype and qclass remaining
   def parse(remaining_data, labels, qdcount) when qdcount == 0 do
     {:ok, [labels: labels, remaining_data: remaining_data]}
   end

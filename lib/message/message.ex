@@ -15,6 +15,6 @@ defmodule ExDns.Message do
   end
 
   defp message_struct(initial_data) do
-    [ header: [], question: [], rr: [], remaining_data: initial_data]
+    [ header: [], question: [], rr: [], remaining_data: initial_data, original_data: initial_data]
   end
 end
