@@ -1,6 +1,17 @@
 defmodule ExDns.Message.Question do
+  #                                 1  1  1  1  1  1
+  #   0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+  # +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+  # |                                               |
+  # /                     QNAME                     /
+  # /                                               /
+  # +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+  # |                     QTYPE                     |
+  # +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+  # |                     QCLASS                    |
+  # +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
   def parse(message_struct) do
-    IO.puts "Parsing question: #{inspect(message_struct[:remaining_data])}"
+    Logger.log(:debug, "Parsing question: #{inspect(message_struct[:remaining_data])}")
     ExDns.Message.Question.parse(message_struct[:header][:qdcount], message_struct[:remaining_data], [], message_struct)
   end
 
@@ -14,7 +25,7 @@ defmodule ExDns.Message.Question do
   end
 
   def parse(qdcount, remaining_data, parsed_question, message_struct) when qdcount == 0 do
-    IO.puts(inspect(parsed_question))
+    Logger.log(:debug, "Completed parsing question: #{inspect(parsed_question)}")
     outbound_message_struct = Keyword.put(message_struct, :remaining_data, remaining_data)
     Keyword.put(outbound_message_struct, :question, parsed_question)
   end
