@@ -27,7 +27,6 @@ defmodule ExDns.Message.QName do
           label :: bitstring-size(qname_label_bits),
           remaining_question :: binary
         >> = question
-        IO.puts label
         labels = List.insert_at(labels, -1, label)
         ExDns.Message.QName.parse(remaining_question, labels, qdcount)
       {:end_of_qname, remaining_question} -> ExDns.Message.QName.parse(remaining_question, labels, qdcount - 1)
